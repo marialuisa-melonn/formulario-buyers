@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta Melonn - Experiencia de Compra Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #2D1B69;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: #2D1B69;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            flex: 1;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .question-counter {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2D1B69;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .question-container {
+            padding: 60px 40px;
+            min-height: 500px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: #2D1B69;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            border-color: #2D1B69;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #2D1B69;
+            background: #e6efff;
+            box-shadow: 0 4px 12px rgba(45, 27, 105, 0.2);
+        }
+
+        .option input[type="checkbox"],
+        .option input[type="radio"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #2D1B69;
+        }
+
+        .option-label {
+            flex: 1;
+            font-size: 16px;
+            color: #2d3748;
+            cursor: pointer;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #2D1B69;
+        }
+
+        .buttons {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-back {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-back:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-next {
+            background: #2D1B69;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(45, 27, 105, 0.3);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stars {
+            display: flex;
+            gap: 10px;
+            font-size: 40px;
+            margin: 20px 0;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #e2e8f0;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+        }
+
+        .thank-you {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .thank-you h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            color: #2D1B69;
+        }
+
+        .thank-you p {
+            font-size: 18px;
+            color: #718096;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .emoji {
+            font-size: 80px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .welcome-logo {
+            margin-bottom: 40px;
+        }
+
+        .welcome-logo img {
+            height: 80px;
+            width: auto;
+        }
+
+        .welcome-screen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #2D1B69;
+        }
+
+        .welcome-screen p {
+            font-size: 18px;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .welcome-screen .time {
+            font-size: 16px;
+            color: #2D1B69;
+            font-weight: 600;
+            margin-bottom: 40px;
+        }
+
+        .btn-start {
+            background: #2D1B69;
+            color: white;
+            padding: 20px 50px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(45, 27, 105, 0.4);
+        }
+
+        .conditional-question {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .powered-by {
+            margin-top: 40px;
+            text-align: center;
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                height: 30px;
+            }
+
+            .question-container {
+                padding: 40px 20px;
+                min-height: 400px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .welcome-screen h1 {
+                font-size: 32px;
+            }
+
+            .welcome-logo img {
+                height: 60px;
+            }
+
+            .question-number {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Logo -->
+        <div class="header">
+            <div class="logo-container">
+                <svg class="logo" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="30" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">melonn</text>
+                </svg>
+            </div>
+            <div class="question-counter" id="questionCounter">Pregunta 1 de 10</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div class="question-container active" id="welcome">
+            <div class="welcome-screen">
+                <div class="welcome-logo">
+                    <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" style="height: 80px; width: auto;">
+                        <text x="0" y="30" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#2D1B69">melonn</text>
+                    </svg>
+                </div>
+                <div class="emoji">📦</div>
+                <h1>2 Minutos para Mejorar tu Experiencia de Compra</h1>
+                <p>Ayúdanos a diseñar una mejor forma de hacer seguimiento a tus pedidos</p>
+                <p class="time">⏱️ Solo 10 preguntas</p>
+                <button class="btn-start" onclick="startSurvey()">Comenzar</button>
+            </div>
+        </div>
+
+        <!-- Question 1 -->
+        <div class="question-container" id="q1">
+            <div class="question-number">1</div>
+            <h2>¿Dónde compras online?</h2>
+            <p class="subtitle">Marca todas las que uses</p>
+            <div class="options">
+                <label class="option">
+                    <input type="checkbox" name="q1" value="amazon" onchange="updateSelection(this)">
+                    <span class="option-label">Amazon</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q1" value="rappi" onchange="updateSelection(this)">
+                    <span class="option-label">Rappi</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q1" value="mercadolibre" onchange="updateSelection(this)">
+                    <span class="option-label">Mercado Libre</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q1" value="ecommerce" onchange="updateSelection(this)">
+                    <span class="option-label">Ecommerce de las marcas (sitios web propios)</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q1" value="todas" onchange="updateSelection(this)">
+                    <span class="option-label">Todas las anteriores</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q1" value="otro" onchange="updateSelection(this); toggleOtherInput(this)">
+                    <span class="option-label">Otro</span>
+                </label>
+                <input type="text" class="text-input" id="q1_otro" placeholder="¿Cuál?" style="display:none; margin-top: 10px;">
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next1" onclick="nextQuestion(1)">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container" id="q2">
+            <div class="question-number">2</div>
+            <h2>¿Con qué frecuencia compras online?</h2>
+            <div class="options">
+                <label class="option">
+                    <input type="radio" name="q2" value="varias" onchange="updateSelection(this)">
+                    <span class="option-label">Varias veces al mes</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q2" value="una" onchange="updateSelection(this)">
+                    <span class="option-label">Una vez al mes</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q2" value="rara" onchange="updateSelection(this)">
+                    <span class="option-label">Rara vez</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next2" onclick="nextQuestion(2)" disabled>Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container" id="q3">
+            <div class="question-number">3</div>
+            <h2>¿Qué es lo MÁS importante para ti al hacer seguimiento?</h2>
+            <p class="subtitle">Elige solo 2</p>
+            <div class="options">
+                <label class="option">
+                    <input type="checkbox" name="q3" value="fecha" onchange="limitCheckbox(this, 2)">
+                    <span class="option-label">📅 Fecha estimada de entrega</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q3" value="ubicacion" onchange="limitCheckbox(this, 2)">
+                    <span class="option-label">📍 Dónde está mi paquete ahora</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q3" value="direccion" onchange="limitCheckbox(this, 2)">
+                    <span class="option-label">🏠 Poder cambiar la dirección</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q3" value="cancelar" onchange="limitCheckbox(this, 2)">
+                    <span class="option-label">❌ Poder cancelar el pedido</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q3" value="evidencia" onchange="limitCheckbox(this, 2)">
+                    <span class="option-label">📸 Ver evidencia de entrega</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next3" onclick="nextQuestion(3)" disabled>Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-container" id="q4">
+            <div class="question-number">4</div>
+            <h2>¿Cuál es tu MAYOR frustración con el seguimiento de pedidos?</h2>
+            <p class="subtitle">Elige solo 1</p>
+            <div class="options">
+                <label class="option">
+                    <input type="radio" name="q4" value="cambios" onchange="updateSelection(this)">
+                    <span class="option-label">No puedo hacer cambios yo mismo (tengo que contactar a la marca)</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q4" value="info" onchange="updateSelection(this)">
+                    <span class="option-label">La información no se actualiza o es confusa</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q4" value="llamar" onchange="updateSelection(this)">
+                    <span class="option-label">Me toca llamar o escribirle directo a la marca</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q4" value="entregado" onchange="updateSelection(this)">
+                    <span class="option-label">Dice "entregado" pero no lo recibí</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next4" onclick="nextQuestion(4)" disabled>Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-container" id="q5">
+            <div class="question-number">5</div>
+            <h2>Si pudieras hacer esto TÚ MISMO sin contactar a la marca, ¿qué usarías?</h2>
+            <p class="subtitle">Marca todas las que usarías</p>
+            <div class="options">
+                <label class="option">
+                    <input type="checkbox" name="q5" value="estado" onchange="updateSelection(this)">
+                    <span class="option-label">Ver estado y fecha de entrega en tiempo real</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q5" value="direccion" onchange="updateSelection(this)">
+                    <span class="option-label">Cambiar la dirección de entrega</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q5" value="cancelar" onchange="updateSelection(this)">
+                    <span class="option-label">Cancelar el pedido</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q5" value="reportar" onchange="updateSelection(this)">
+                    <span class="option-label">Reportar problemas (no llegó, llegó dañado)</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q5" value="foto" onchange="updateSelection(this)">
+                    <span class="option-label">Ver foto de la entrega</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next5" onclick="nextQuestion(5)">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-container" id="q6">
+            <div class="question-number">6</div>
+            <h2>¿Has tenido estos problemas?</h2>
+            <p class="subtitle">Marca los que apliquen</p>
+            <div class="options">
+                <label class="option">
+                    <input type="checkbox" name="q6" value="direccion" onchange="updateSelection(this)">
+                    <span class="option-label">Me equivoqué en la dirección y no pude cambiarla</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q6" value="cancelar" onchange="updateSelection(this)">
+                    <span class="option-label">Quise cancelar pero ya era tarde</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q6" value="norecibi" onchange="updateSelection(this)">
+                    <span class="option-label">Dice "entregado" pero no lo recibí</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q6" value="danado" onchange="updateSelection(this)">
+                    <span class="option-label">Llegó dañado/incompleto</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q6" value="demora" onchange="updateSelection(this)">
+                    <span class="option-label">Está demorada la entrega y no tengo visibilidad de la razón ni de cuándo llegará</span>
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q6" value="ninguno" onchange="updateSelection(this)">
+                    <span class="option-label">✅ Ninguno</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next6" onclick="nextQuestion(6)">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-container" id="q7">
+            <div class="question-number">7</div>
+            <h2>Si pudieras reportar un problema directamente, ¿subirías 2-3 fotos como evidencia?</h2>
+            <div class="options">
+                <label class="option">
+                    <input type="radio" name="q7" value="si" onchange="updateSelection(this)">
+                    <span class="option-label">Sí</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q7" value="talvez" onchange="updateSelection(this)">
+                    <span class="option-label">Tal vez</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q7" value="no" onchange="updateSelection(this)">
+                    <span class="option-label">No</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next7" onclick="nextQuestion(7)" disabled>Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-container" id="q8">
+            <div class="question-number">8</div>
+            <h2>¿Qué tan dispuesto estarías a usar un portal para gestionar tu pedido en lugar de contactar a la marca?</h2>
+            <div class="options">
+                <label class="option">
+                    <input type="radio" name="q8" value="muy" onchange="updateSelection(this)">
+                    <span class="option-label">😊 Muy dispuesto</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q8" value="depende" onchange="updateSelection(this)">
+                    <span class="option-label">😐 Depende</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q8" value="prefiero" onchange="updateSelection(this)">
+                    <span class="option-label">😕 Prefiero contactar</span>
+                </label>
+            </div>
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next8" onclick="nextQuestion(8)" disabled>Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-container" id="q9">
+            <div class="question-number">9</div>
+            <h2>¿Hay alguna tienda cuyo seguimiento te GUSTA? ¿Cuál?</h2>
+            <p class="subtitle">Opcional</p>
+            <input type="text" class="text-input" id="q9_text" placeholder="Ejemplo: MercadoLibre, Amazon...">
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next9" onclick="nextQuestion(9)">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-container" id="q10">
+            <div class="question-number">10</div>
+            <h2>¿Has comprado o compras regularmente en marcas que tengan su logística con Melonn?</h2>
+            <p class="subtitle">Ejemplos: Medipiel, True, Armatura, You Matter, Beauty Creations, Reset, etc.</p>
+            <div class="options">
+                <label class="option">
+                    <input type="radio" name="q10" value="si" onchange="updateSelection(this); showRating()">
+                    <span class="option-label">Sí, he comprado</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q10" value="noseguro" onchange="updateSelection(this); hideRating()">
+                    <span class="option-label">No estoy seguro/No sé qué marcas usan Melonn</span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="q10" value="no" onchange="updateSelection(this); hideRating()">
+                    <span class="option-label">No, no he comprado</span>
+                </label>
+            </div>
+            
+            <div class="conditional-question" id="rating" style="display:none;">
+                <h2 style="font-size: 24px; margin-bottom: 20px;">Si respondiste "Sí": ¿Cómo calificas el servicio de entrega?</h2>
+                <div class="stars" id="stars">
+                    <span class="star" data-value="1" onclick="setRating(1)">⭐</span>
+                    <span class="star" data-value="2" onclick="setRating(2)">⭐</span>
+                    <span class="star" data-value="3" onclick="setRating(3)">⭐</span>
+                    <span class="star" data-value="4" onclick="setRating(4)">⭐</span>
+                    <span class="star" data-value="5" onclick="setRating(5)">⭐</span>
+                </div>
+                <p id="rating-text" style="color: #718096; margin-top: 10px;"></p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" id="next10" onclick="nextQuestion(10)" disabled>Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- Demographics -->
+        <div class="question-container" id="demographics">
+            <div class="question-number">✓</div>
+            <h2>Últimas preguntas (Opcional)</h2>
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 10px; color: #4a5568; font-weight: 600;">País:</label>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="country" value="colombia" onchange="updateSelection(this)">
+                        <span class="option-label">🇨🇴 Colombia</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="country" value="mexico" onchange="updateSelection(this)">
+                        <span class="option-label">🇲🇽 México</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="country" value="otro" onchange="updateSelection(this)">
+                        <span class="option-label">Otro</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 10px; color: #4a5568; font-weight: 600;">Edad:</label>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="age" value="18-24" onchange="updateSelection(this)">
+                        <span class="option-label">18-24</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="age" value="25-34" onchange="updateSelection(this)">
+                        <span class="option-label">25-34</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="age" value="35-44" onchange="updateSelection(this)">
+                        <span class="option-label">35-44</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="age" value="45+" onchange="updateSelection(this)">
+                        <span class="option-label">45+</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 10px; color: #4a5568; font-weight: 600;">¿Tienes alguna idea o comentario adicional sobre el seguimiento de pedidos?</label>
+                <textarea 
+                    class="text-input" 
+                    id="comments" 
+                    placeholder="Comparte cualquier idea, sugerencia o experiencia que quieras contarnos..."
+                    style="min-height: 120px; resize: vertical; font-family: inherit;"
+                ></textarea>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
+                <button class="btn-next" onclick="submitSurvey()">Finalizar →</button>
+            </div>
+        </div>
+
+        <!-- Thank You -->
+        <div class="question-container" id="thankyou">
+            <div class="thank-you">
+                <div class="emoji">🎉</div>
+                <h2>¡Muchas gracias!</h2>
+                <p>Tu opinión es muy valiosa para ayudarnos a crear mejores experiencias de compra online.</p>
+                <div class="powered-by">
+                    <p>Powered by Melonn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        const totalQuestions = 12;
+        let responses = {};
+        let selectedRating = 0;
+
+        function startSurvey() {
+            currentQuestion = 1;
+            showQuestion(currentQuestion);
+            updateProgress();
+            updateQuestionCounter();
+        }
+
+        function showQuestion(num) {
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            
+            const questionIds = ['welcome', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10', 'demographics', 'thankyou'];
+            document.getElementById(questionIds[num]).classList.add('active');
+            
+            window.scrollTo(0, 0);
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / (totalQuestions - 1)) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateQuestionCounter() {
+            const counter = document.getElementById('questionCounter');
+            if (currentQuestion === 0) {
+                counter.textContent = 'Bienvenida';
+            } else if (currentQuestion <= 10) {
+                counter.textContent = `Pregunta ${currentQuestion} de 10`;
+            } else if (currentQuestion === 11) {
+                counter.textContent = 'Datos opcionales';
+            } else {
+                counter.textContent = 'Completado';
+            }
+        }
+
+        function nextQuestion(questionNum) {
+            saveResponse(questionNum);
+            
+            currentQuestion++;
+            showQuestion(currentQuestion);
+            updateProgress();
+            updateQuestionCounter();
+        }
+
+        function prevQuestion() {
+            currentQuestion--;
+            if (currentQuestion < 1) currentQuestion = 1;
+            showQuestion(currentQuestion);
+            updateProgress();
+            updateQuestionCounter();
+        }
+
+        function saveResponse(questionNum) {
+            const key = 'q' + questionNum;
+            
+            if (questionNum === 1 || questionNum === 3 || questionNum === 5 || questionNum === 6) {
+                const checked = document.querySelectorAll(`input[name="q${questionNum}"]:checked`);
+                responses[key] = Array.from(checked).map(el => el.value);
+                
+                if (questionNum === 1 && responses[key].includes('otro')) {
+                    responses[key + '_otro'] = document.getElementById('q1_otro').value;
+                }
+            } else if (questionNum === 9) {
+                responses[key] = document.getElementById('q9_text').value;
+            } else if (questionNum === 10) {
+                const selected = document.querySelector(`input[name="q${questionNum}"]:checked`);
+                responses[key] = selected ? selected.value : '';
+                if (responses[key] === 'si') {
+                    responses[key + '_rating'] = selectedRating;
+                }
+            } else {
+                const selected = document.querySelector(`input[name="q${questionNum}"]:checked`);
+                responses[key] = selected ? selected.value : '';
+            }
+        }
+
+        function updateSelection(element) {
+            const parent = element.closest('.option');
+            
+            if (element.type === 'radio') {
+                const group = element.name;
+                document.querySelectorAll(`input[name="${group}"]`).forEach(input => {
+                    input.closest('.option').classList.remove('selected');
+                });
+                
+                if (element.checked) {
+                    parent.classList.add('selected');
+                    
+                    const questionNum = group.replace('q', '');
+                    const nextBtn = document.getElementById('next' + questionNum);
+                    if (nextBtn) nextBtn.disabled = false;
+                }
+            } else if (element.type === 'checkbox') {
+                if (element.checked) {
+                    parent.classList.add('selected');
+                } else {
+                    parent.classList.remove('selected');
+                }
+                
+                const questionNum = element.name.replace('q', '');
+                const checked = document.querySelectorAll(`input[name="${element.name}"]:checked`).length;
+                const nextBtn = document.getElementById('next' + questionNum);
+                if (nextBtn) nextBtn.disabled = checked === 0;
+            }
+        }
+
+        function limitCheckbox(element, max) {
+            const group = element.name;
+            const checked = document.querySelectorAll(`input[name="${group}"]:checked`);
+            
+            if (checked.length > max) {
+                element.checked = false;
+                element.closest('.option').classList.remove('selected');
+            }
+            
+            updateSelection(element);
+        }
+
+        function toggleOtherInput(checkbox) {
+            const input = document.getElementById('q1_otro');
+            input.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function showRating() {
+            document.getElementById('rating').style.display = 'block';
+            document.getElementById('next10').disabled = selectedRating === 0;
+        }
+
+        function hideRating() {
+            document.getElementById('rating').style.display = 'none';
+            selectedRating = 0;
+            document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+            document.getElementById('next10').disabled = false;
+        }
+
+        function setRating(value) {
+            selectedRating = value;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < value) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            const texts = ['Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
+            document.getElementById('rating-text').textContent = texts[value - 1];
+            document.getElementById('next10').disabled = false;
+        }
+
+        function submitSurvey() {
+            const country = document.querySelector('input[name="country"]:checked');
+            const age = document.querySelector('input[name="age"]:checked');
+            const comments = document.getElementById('comments').value;
+            
+            if (country) responses.country = country.value;
+            if (age) responses.age = age.value;
+            if (comments) responses.comments = comments;
+            
+            console.log('Survey responses:', responses);
+            localStorage.setItem('surveyResponses', JSON.stringify(responses));
+            
+            currentQuestion = 12;
+            showQuestion(currentQuestion);
+            updateProgress();
+            updateQuestionCounter();
+            
+            // TODO: Send to your backend
+            // fetch('YOUR_API_ENDPOINT', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(responses)
+            // });
+        }
+    </script>
+</body>
+</html>
