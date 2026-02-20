@@ -496,22 +496,22 @@
         <div class="question-container" id="q4">
             <div class="question-number">4</div>
             <h2>¿Cuál es tu MAYOR frustración con el seguimiento de pedidos?</h2>
-            <p class="subtitle">Elige solo 1</p>
+            <p class="subtitle">Puedes elegir más de una</p>
             <div class="options">
                 <label class="option">
-                    <input type="radio" name="q4" value="cambios" onchange="updateSelection(this)">
+                    <input type="checkbox" name="q4" value="cambios" onchange="updateSelection(this)">
                     <span class="option-label">No puedo hacer cambios yo mismo (tengo que contactar a la marca)</span>
                 </label>
                 <label class="option">
-                    <input type="radio" name="q4" value="info" onchange="updateSelection(this)">
+                    <input type="checkbox" name="q4" value="info" onchange="updateSelection(this)">
                     <span class="option-label">La información no se actualiza o es confusa</span>
                 </label>
                 <label class="option">
-                    <input type="radio" name="q4" value="llamar" onchange="updateSelection(this)">
+                    <input type="checkbox" name="q4" value="llamar" onchange="updateSelection(this)">
                     <span class="option-label">Me toca llamar o escribirle directo a la marca</span>
                 </label>
                 <label class="option">
-                    <input type="radio" name="q4" value="entregado" onchange="updateSelection(this)">
+                    <input type="checkbox" name="q4" value="entregado" onchange="updateSelection(this)">
                     <span class="option-label">Dice "entregado" pero no lo recibí</span>
                 </label>
             </div>
@@ -643,11 +643,11 @@
         <div class="question-container" id="q9">
             <div class="question-number">9</div>
             <h2>¿Hay alguna tienda cuyo seguimiento te GUSTA? ¿Cuál?</h2>
-            <p class="subtitle">Opcional</p>
-            <input type="text" class="text-input" id="q9_text" placeholder="Ejemplo: MercadoLibre, Amazon...">
+            <p class="subtitle">Piensa en una experiencia de compra que hayas sentido que fue WOW</p>
+            <input type="text" class="text-input" id="q9_text" placeholder="Ejemplo: MercadoLibre, Amazon..." oninput="validateQ9()">
             <div class="buttons">
                 <button class="btn-back" onclick="prevQuestion()">← Atrás</button>
-                <button class="btn-next" id="next9" onclick="nextQuestion(9)">Siguiente →</button>
+                <button class="btn-next" id="next9" onclick="nextQuestion(9)" disabled>Siguiente →</button>
             </div>
         </div>
 
@@ -822,7 +822,7 @@
         function saveResponse(questionNum) {
             const key = 'q' + questionNum;
             
-            if (questionNum === 1 || questionNum === 3 || questionNum === 5 || questionNum === 6) {
+            if (questionNum === 1 || questionNum === 3 || questionNum === 4 || questionNum === 5 || questionNum === 6) {
                 const checked = document.querySelectorAll(`input[name="q${questionNum}"]:checked`);
                 responses[key] = Array.from(checked).map(el => el.value);
                 
@@ -890,6 +890,12 @@
             input.style.display = checkbox.checked ? 'block' : 'none';
         }
 
+        function validateQ9() {
+            const input = document.getElementById('q9_text');
+            const nextBtn = document.getElementById('next9');
+            nextBtn.disabled = input.value.trim().length < 2;
+        }
+
         function showRating() {
             document.getElementById('rating').style.display = 'block';
             document.getElementById('next10').disabled = selectedRating === 0;
@@ -927,20 +933,74 @@
             if (age) responses.age = age.value;
             if (comments) responses.comments = comments;
             
+            // Agregar timestamp
+            responses.timestamp = new Date().toISOString();
+            
             console.log('Survey responses:', responses);
             localStorage.setItem('surveyResponses', JSON.stringify(responses));
             
+            // Enviar a Google Sheets
+            sendToGoogleSheets(responses);
+            
+            // Mostrar pantalla de agradecimiento
             currentQuestion = 12;
             showQuestion(currentQuestion);
             updateProgress();
             updateQuestionCounter();
-            
-            // TODO: Send to your backend
-            // fetch('YOUR_API_ENDPOINT', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(responses)
-            // });
+        }
+
+        // CONFIGURACIÓN GOOGLE SHEETS
+        // Reemplaza esta URL con la URL de tu Google Apps Script Web App
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyo7pYS3bndjyjmmRyO-oYZQuvKHIkK7qsiHVDfeZpyZ2gMIz-bN_B4uwdeFLO1HDrQ8A/exec';
+
+        function sendToGoogleSheets(data) {
+            // Preparar datos en formato plano para Google Sheets
+            const flatData = {
+                timestamp: data.timestamp || new Date().toISOString(),
+                // Pregunta 1
+                q1_donde_compras: Array.isArray(data.q1) ? data.q1.join(', ') : '',
+                q1_otro: data.q1_otro || '',
+                // Pregunta 2
+                q2_frecuencia: data.q2 || '',
+                // Pregunta 3
+                q3_importante: Array.isArray(data.q3) ? data.q3.join(', ') : '',
+                // Pregunta 4 (ahora múltiple)
+                q4_frustracion: Array.isArray(data.q4) ? data.q4.join(', ') : '',
+                // Pregunta 5
+                q5_usarias: Array.isArray(data.q5) ? data.q5.join(', ') : '',
+                // Pregunta 6
+                q6_problemas: Array.isArray(data.q6) ? data.q6.join(', ') : '',
+                // Pregunta 7
+                q7_fotos: data.q7 || '',
+                // Pregunta 8
+                q8_dispuesto: data.q8 || '',
+                // Pregunta 9
+                q9_referente: data.q9 || '',
+                // Pregunta 10
+                q10_compra_melonn: data.q10 || '',
+                q10_rating: data.q10_rating || '',
+                // Demográficos
+                country: data.country || '',
+                age: data.age || '',
+                comments: data.comments || ''
+            };
+
+            // Enviar a Google Sheets
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Importante para Google Apps Script
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(flatData)
+            })
+            .then(() => {
+                console.log('Datos enviados a Google Sheets exitosamente');
+            })
+            .catch(error => {
+                console.error('Error al enviar a Google Sheets:', error);
+                // Los datos ya están guardados en localStorage como backup
+            });
         }
     </script>
 </body>
